@@ -1,0 +1,572 @@
+{
+  "info": {
+    "_postman_id": "d7d6b4f5-8a5e-4b5a-9d4c-task5cifar10",
+    "name": "Task 5 - CIFAR-10 Flask API Testing",
+    "description": "API validation collection for the CIFAR-10 CNN Flask API from Task 4. TC01-TC06 are the core tests; TC07-TC11 are extended negative/validation tests. Place test_image.png, test_image_2.png and invalid.txt in the Postman working directory and re-select the files after import.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01 - Health Tests",
+      "item": [
+        {
+          "name": "TC01 - Home Endpoint",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:5000/",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "5000",
+              "path": [
+                ""
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response is JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});",
+                  "const response = pm.response.json();",
+                  "pm.test(\"API status is running\", function () {",
+                  "    pm.expect(response.status).to.eql(\"running\");",
+                  "});",
+                  "pm.test(\"Dataset is CIFAR-10\", function () {",
+                  "    pm.expect(response.dataset).to.eql(\"CIFAR-10\");",
+                  "});",
+                  "pm.test(\"Model is CNN\", function () {",
+                  "    pm.expect(response.model).to.eql(\"CNN\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC02 - Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:5000/health",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "5000",
+              "path": [
+                "health"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response is JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});",
+                  "const response = pm.response.json();",
+                  "pm.test(\"API is healthy\", function () {",
+                  "    pm.expect(response.status).to.eql(\"healthy\");",
+                  "});",
+                  "pm.test(\"Model is loaded\", function () {",
+                  "    pm.expect(response.model_loaded).to.eql(true);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 - Prediction Tests",
+      "item": [
+        {
+          "name": "TC03 - Valid Image Prediction",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "test_image.png"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://127.0.0.1:5000/predict",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "5000",
+              "path": [
+                "predict"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response is JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});",
+                  "const response = pm.response.json();",
+                  "pm.test(\"Prediction successful\", function () {",
+                  "    pm.expect(response.success).to.eql(true);",
+                  "});",
+                  "pm.test(\"Prediction exists\", function () {",
+                  "    pm.expect(response.prediction).to.exist;",
+                  "});",
+                  "pm.test(\"Confidence exists\", function () {",
+                  "    pm.expect(response.confidence).to.exist;",
+                  "});",
+                  "pm.test(\"Confidence is between 0 and 1\", function () {",
+                  "    pm.expect(response.confidence).to.be.at.least(0);",
+                  "    pm.expect(response.confidence).to.be.at.most(1);",
+                  "});",
+                  "pm.test(\"Prediction is valid CIFAR-10 class\", function () {",
+                  "    const classes = [\"airplane\",\"automobile\",\"bird\",\"cat\",\"deer\",\"dog\",\"frog\",\"horse\",\"ship\",\"truck\"];",
+                  "    pm.expect(classes).to.include(response.prediction);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 - Negative Tests",
+      "item": [
+        {
+          "name": "TC04 - Missing Image",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "http://127.0.0.1:5000/predict",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "5000",
+              "path": [
+                "predict"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Response is JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});",
+                  "const response = pm.response.json();",
+                  "pm.test(\"Success is false\", function () {",
+                  "    pm.expect(response.success).to.eql(false);",
+                  "});",
+                  "pm.test(\"Correct error message\", function () {",
+                  "    pm.expect(response.error).to.eql(\"No image file provided.\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC05 - Invalid HTTP Method",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:5000/predict",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "5000",
+              "path": [
+                "predict"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 405\", function () {",
+                  "    pm.response.to.have.status(405);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC06 - Invalid Image File",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "invalid.txt"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://127.0.0.1:5000/predict",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "5000",
+              "path": [
+                "predict"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 500\", function () {",
+                  "    pm.response.to.have.status(500);",
+                  "});",
+                  "pm.test(\"Response is JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});",
+                  "const response = pm.response.json();",
+                  "pm.test(\"Success is false\", function () {",
+                  "    pm.expect(response.success).to.eql(false);",
+                  "});",
+                  "pm.test(\"Error field exists\", function () {",
+                  "    pm.expect(response.error).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04 - Extended Validation Tests",
+      "item": [
+        {
+          "name": "TC07 - Wrong Form Field Name",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:5000/predict",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "5000",
+              "path": [
+                "predict"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "test_image.png"
+                }
+              ]
+            },
+            "description": "Field is named 'file' instead of 'image'. Expect 400."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Response is JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});",
+                  "const response = pm.response.json();",
+                  "pm.test(\"Success is false\", function () {",
+                  "    pm.expect(response.success).to.eql(false);",
+                  "});",
+                  "pm.test(\"Correct error message\", function () {",
+                  "    pm.expect(response.error).to.eql(\"No image file provided.\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC08 - JSON Body Instead of Multipart",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://127.0.0.1:5000/predict",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "5000",
+              "path": [
+                "predict"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"image\": \"not-a-file\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Wrong content type. Expect 400."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Response is JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});",
+                  "const response = pm.response.json();",
+                  "pm.test(\"Success is false\", function () {",
+                  "    pm.expect(response.success).to.eql(false);",
+                  "});",
+                  "pm.test(\"Correct error message\", function () {",
+                  "    pm.expect(response.error).to.eql(\"No image file provided.\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC09 - POST on Home Endpoint",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:5000/",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "5000",
+              "path": [
+                ""
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 405\", function () {",
+                  "    pm.response.to.have.status(405);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC10 - Unknown Route",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:5000/unknown",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "5000",
+              "path": [
+                "unknown"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC11 - Second Valid Image (Probability Integrity)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:5000/predict",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "5000",
+              "path": [
+                "predict"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "test_image_2.png"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response is JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});",
+                  "const response = pm.response.json();",
+                  "pm.test(\"Prediction successful\", function () {",
+                  "    pm.expect(response.success).to.eql(true);",
+                  "});",
+                  "pm.test(\"Prediction is valid CIFAR-10 class\", function () {",
+                  "    const classes = [\"airplane\",\"automobile\",\"bird\",\"cat\",\"deer\",\"dog\",\"frog\",\"horse\",\"ship\",\"truck\"];",
+                  "    pm.expect(classes).to.include(response.prediction);",
+                  "});",
+                  "pm.test(\"Exactly 10 class probabilities\", function () {",
+                  "    pm.expect(Object.keys(response.probabilities)).to.have.lengthOf(10);",
+                  "});",
+                  "pm.test(\"Probabilities sum to ~1\", function () {",
+                  "    const s = Object.values(response.probabilities).reduce((a,b)=>a+b,0);",
+                  "    pm.expect(s).to.be.within(0.98,1.02);",
+                  "});",
+                  "pm.test(\"Top probability equals confidence\", function () {",
+                  "    pm.expect(Math.max(...Object.values(response.probabilities))).to.be.closeTo(response.confidence,0.001);",
+                  "});",
+                  "pm.test(\"Response time under 5000 ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
